@@ -1,12 +1,23 @@
 @require: pervasives
 
 % B5用紙
-let b5paper = UserDefinedPaper(182mm, 257mm)
+let page-width = 182mm
+let page-height = 257mm
 % 文字サイズ13Q
 let font-size-normal = 3.25mm
 % 行送り22H(=13+9)
 let line-space-normal = 2.25mm
 let leading-normal = font-size-normal +' line-space-normal
+% 版面の幅
+let hanzura-width = font-size-normal *' 40.
+% 版面の左マージン
+let left-margin = (page-width -' hanzura-width) *' 0.5
+% 版面の上マージン
+let top-margin = 25mm
+% 1ページあたりの行数
+let line-number = 38
+% 版面の高さ
+let hanzura-height = leading-normal *' (float line-number) -' line-space-normal
 
 % 大きさの基準を和文にする
 let font-ratio-latin = 1.0 /. 0.88
@@ -72,10 +83,11 @@ let-block ctx +pn inner =
 let document bt =
   let ctx = get-standard-context in
   let bb = read-block ctx bt in
-  page-break b5paper
+  let paper-size = (UserDefinedPaper(page-width, page-height)) in
+  page-break paper-size
     (fun _ -> (|
-      text-origin = (26mm, 25mm);
-      text-height = 206.75mm;
+      text-origin = (left-margin, top-margin);
+      text-height = hanzura-height;
     |))
     (fun _ -> (|
       header-origin = (0mm, 0mm);
