@@ -1,4 +1,6 @@
 @require: pervasives
+@require: option
+@require: annot
 
 % B5用紙
 let page-width = 182mm
@@ -30,6 +32,20 @@ let font-latin-sans   = (`lmsans`    , font-ratio-latin, 0.)
 let font-latin-mono   = (`lmmono`    , font-ratio-latin, 0.)
 let font-cjk-mincho   = (`ipaexm`    , font-ratio-cjk  , 0.)
 let font-cjk-gothic   = (`ipaexg`    , font-ratio-cjk  , 0.)
+let set-cjk-font font ctx =
+  ctx |> set-font Kana font
+      |> set-font HanIdeographic font
+
+% 見出しの設定
+%% 節
+%% 3行取り = 57H = 20H + 24Q + 13H
+let make-section-title ctx =
+  ctx |> set-font-size 6mm
+      |> set-font Latin font-latin-sans
+      |> set-cjk-font font-cjk-gothic
+
+let section-top-margin = 5mm
+let section-bottom-margin = 3.25mm
 
 % 標準数式コマンド
 let-inline ctx \math m =
@@ -78,6 +94,62 @@ let-block ctx +pn inner =
   let () = needs-indentation-ref <- true in
   let ib-inner = read-inline ctx inner in
     form-paragraph ctx (ib-inner ++ inline-fil)
+
+% 目次関連
+let-mutable toc-acc-ref <- []
+let-mutable outline-ref <- []
+type toc-element =
+  | TOCElementSection    of string * inline-text
+  | TOCElementSubsection of string * inline-text
+let generate-fresh-label =
+  let-mutable count <- 0 in
+    (fun () -> (
+      let () = count <- !count + 1 in
+        `generated:` ^ (arabic (!count))
+    ))
+
+% 節の設定
+let-mutable num-section <- 0
+let no-pads = (0pt, 0pt, 0pt, 0pt)
+
+let section-heading ctx ib-heading =
+  let wid = get-text-width ctx in
+  let color = get-text-color ctx in
+    line-break true false (ctx |> set-paragraph-margin section-top-margin section-bottom-margin)
+      ib-heading
+
+
+let section-scheme ctx label title outline-title-opt inner =
+  let ctx-title = make-section-title ctx in
+  let () = num-section <- !num-section + 1 in
+  % let () = num-subsection <- 0 in
+  let () = needs-indentation-ref <- false in % 節の最初の段落は字下げしない
+  let s-num = arabic (!num-section) in
+  let () = register-cross-reference (label ^ `:num`) s-num in
+  let () = toc-acc-ref <- (TOCElementSection(label, title)) :: !toc-acc-ref in
+  let ib-num =
+    read-inline ctx-title (embed-string (s-num ^ `.`))
+      ++ hook-page-break (fun pbinfo _ -> register-cross-reference (label ^ `:page`) (arabic pbinfo#page-number))
+  in
+  let ib-title = read-inline ctx-title title in
+  let outline-title = Option.from (extract-string ib-title) outline-title-opt in
+  let () = outline-ref <- (0, s-num ^ `. `#  ^ outline-title, label, false) :: !outline-ref in
+  let bb-title =
+    block-frame-breakable ctx no-pads (Annot.register-location-frame label) (fun ctx -> (
+      (section-heading ctx
+        (ib-num ++ (inline-skip 3mm) ++ ib-title ++ (inline-fil)))))
+  in
+  let bb-inner = read-block ctx inner in
+    bb-title +++ bb-inner
+
+let-block ctx +section ?:labelopt ?:outline-title-opt title inner =
+  let label =
+    match labelopt with
+    | None        -> generate-fresh-label ()
+    | Some(label) -> label
+  in
+    section-scheme ctx label title outline-title-opt inner
+
 
 % 全体の設定（エントリポイント）
 let document bt =
