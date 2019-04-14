@@ -1,6 +1,6 @@
 let font-size-normal = 3.25mm
 
-let font-ratio-latin = 1.0
+let font-ratio-latin = 1.0 /. 0.88
 let font-ratio-cjk = 1.0
 
 let font-latin-roman  = (`Junicode`   , font-ratio-latin, 0.)
