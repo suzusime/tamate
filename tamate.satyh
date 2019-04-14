@@ -1,0 +1,26 @@
+let-inline ctx \math m =
+  script-guard Latin (embed-math ctx m)
+
+let-block ctx +p it =
+  line-break true true ctx
+    (read-inline ctx it ++ inline-fil)
+
+let document bt =
+  let ctx =
+    get-initial-context 440pt (command \math)
+      |> set-dominant-narrow-script Latin
+  in
+  let bb = read-block ctx bt in
+  let b5paper = UserDefinedPaper(182mm, 257mm) in
+  page-break b5paper
+    (fun _ -> (|
+      text-origin = (26mm, 25mm);
+      text-height = 206.75mm;
+    |))
+    (fun _ -> (|
+      header-origin = (0mm, 0mm);
+      header-content = block-nil;
+      footer-origin = (0mm, 0mm);
+      footer-content = block-nil;
+    |))
+    bb
