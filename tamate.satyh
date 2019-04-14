@@ -1,14 +1,18 @@
 @require: pervasives
 
+% B5用紙
+let b5paper = UserDefinedPaper(182mm, 257mm)
 % 文字サイズ13Q
 let font-size-normal = 3.25mm
 % 行送り22H(=13+9)
 let line-space-normal = 2.25mm
 let leading-normal = font-size-normal +' line-space-normal
 
+% 大きさの基準を和文にする
 let font-ratio-latin = 1.0 /. 0.88
 let font-ratio-cjk = 1.0
 
+% フォント設定
 let font-latin-roman  = (`Junicode`   , font-ratio-latin, 0.)
 let font-latin-italic = (`Junicode-it`, font-ratio-latin, 0.)
 let font-latin-sans   = (`lmsans`    , font-ratio-latin, 0.)
@@ -16,9 +20,11 @@ let font-latin-mono   = (`lmmono`    , font-ratio-latin, 0.)
 let font-cjk-mincho   = (`ipaexm`    , font-ratio-cjk  , 0.)
 let font-cjk-gothic   = (`ipaexg`    , font-ratio-cjk  , 0.)
 
+% 標準数式コマンド
 let-inline ctx \math m =
   script-guard Latin (embed-math ctx m)
 
+% 全体の基本となる文脈の設定
 let get-standard-context =
   get-initial-context 130mm (command \math)
     |> set-paragraph-margin 0mm line-space-normal
@@ -35,11 +41,12 @@ let get-standard-context =
     |> set-leading leading-normal
     |> set-hyphen-penalty 100
 
+% 字下げの設定
 let-mutable needs-indentation-ref <- true
-
 let quad-indent ctx =
   inline-skip (get-font-size ctx)
 
+% 標準段落
 let-block ctx +p inner =
   let needs-indentation =
     if !needs-indentation-ref then true else
@@ -55,15 +62,16 @@ let-block ctx +p inner =
   in
     form-paragraph ctx br-parag
 
+% 字下げなし段落
 let-block ctx +pn inner =
   let () = needs-indentation-ref <- true in
   let ib-inner = read-inline ctx inner in
     form-paragraph ctx (ib-inner ++ inline-fil)
 
+% 全体の設定（エントリポイント）
 let document bt =
   let ctx = get-standard-context in
   let bb = read-block ctx bt in
-  let b5paper = UserDefinedPaper(182mm, 257mm) in
   page-break b5paper
     (fun _ -> (|
       text-origin = (26mm, 25mm);
