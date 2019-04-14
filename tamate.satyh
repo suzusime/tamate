@@ -2,8 +2,9 @@
 
 % 文字サイズ13Q
 let font-size-normal = 3.25mm
-% 行送り22H
-let line-space-normal = 5.5mm
+% 行送り22H(=13+9)
+let line-space-normal = 2.25mm
+let leading-normal = font-size-normal +' line-space-normal
 
 let font-ratio-latin = 1.0 /. 0.88
 let font-ratio-cjk = 1.0
@@ -20,6 +21,7 @@ let-inline ctx \math m =
 
 let get-standard-context =
   get-initial-context 130mm (command \math)
+    |> set-paragraph-margin 0mm line-space-normal
     |> set-dominant-wide-script Kana
     |> set-language Kana Japanese
     |> set-language HanIdeographic Japanese
@@ -30,7 +32,7 @@ let get-standard-context =
     |> set-font Latin          font-latin-roman
     |> set-math-font `lmodern`
     |> set-font-size font-size-normal
-    |> set-leading line-space-normal
+    |> set-leading leading-normal
     |> set-hyphen-penalty 100
 
 let-mutable needs-indentation-ref <- true
