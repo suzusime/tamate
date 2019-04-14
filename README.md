@@ -1,0 +1,2 @@
+# tamate
+SATySFi用ドキュメントクラス
