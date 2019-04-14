@@ -7,7 +7,7 @@ let-block ctx +p it =
 
 let document bt =
   let ctx =
-    get-initial-context 440pt (command \math)
+    get-initial-context 130mm (command \math)
       |> set-dominant-narrow-script Latin
   in
   let bb = read-block ctx bt in
