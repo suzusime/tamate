@@ -1,5 +1,31 @@
+let font-size-normal = 3.25mm
+
+let font-ratio-latin = 1.0
+let font-ratio-cjk = 1.0
+
+let font-latin-roman  = (`Junicode`   , font-ratio-latin, 0.)
+let font-latin-italic = (`Junicode-it`, font-ratio-latin, 0.)
+let font-latin-sans   = (`lmsans`    , font-ratio-latin, 0.)
+let font-latin-mono   = (`lmmono`    , font-ratio-latin, 0.)
+let font-cjk-mincho   = (`ipaexm`    , font-ratio-cjk  , 0.)
+let font-cjk-gothic   = (`ipaexg`    , font-ratio-cjk  , 0.)
+
 let-inline ctx \math m =
   script-guard Latin (embed-math ctx m)
+
+let get-standard-context =
+  get-initial-context 130mm (command \math)
+    |> set-dominant-wide-script Kana
+    |> set-language Kana Japanese
+    |> set-language HanIdeographic Japanese
+    |> set-dominant-narrow-script Latin
+    |> set-language Latin English
+    |> set-font Kana           font-cjk-mincho
+    |> set-font HanIdeographic font-cjk-mincho
+    |> set-font Latin          font-latin-roman
+    |> set-math-font `lmodern`
+    |> set-font-size font-size-normal
+    |> set-hyphen-penalty 100
 
 let-block ctx +p it =
   line-break true true ctx
@@ -7,7 +33,7 @@ let-block ctx +p it =
 
 let document bt =
   let ctx =
-    get-initial-context 130mm (command \math)
+    get-standard-context
       |> set-dominant-narrow-script Latin
   in
   let bb = read-block ctx bt in
