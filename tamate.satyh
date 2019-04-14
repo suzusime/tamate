@@ -9,13 +9,13 @@ let font-size-normal = 3.25mm
 let line-space-normal = 2.25mm
 let leading-normal = font-size-normal +' line-space-normal
 % 版面の幅
-let hanzura-width = font-size-normal *' 40.
+let hanzura-width = font-size-normal *' 44.
 % 版面の左マージン
 let left-margin = (page-width -' hanzura-width) *' 0.5
 % 版面の上マージン
-let top-margin = 25mm
+let top-margin = 18mm
 % 1ページあたりの行数
-let line-number = 38
+let line-number = 40
 % 版面の高さ
 let hanzura-height = leading-normal *' (float line-number) -' line-space-normal
 
@@ -37,7 +37,7 @@ let-inline ctx \math m =
 
 % 全体の基本となる文脈の設定
 let get-standard-context =
-  get-initial-context 130mm (command \math)
+  get-initial-context hanzura-width (command \math)
     |> set-paragraph-margin 0mm line-space-normal
     |> set-dominant-wide-script Kana
     |> set-language Kana Japanese
