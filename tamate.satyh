@@ -44,8 +44,8 @@ let make-section-title ctx =
       |> set-font Latin font-latin-sans
       |> set-cjk-font font-cjk-gothic
 
-let section-top-margin = 5mm
-let section-bottom-margin = 3.25mm
+let section-top-margin = 2.25mm+'5mm
+let section-bottom-margin = 2.25mm+'3.25mm
 
 % 標準数式コマンド
 let-inline ctx \math m =
@@ -123,7 +123,7 @@ let section-scheme ctx label title outline-title-opt inner =
   let ctx-title = make-section-title ctx in
   let () = num-section <- !num-section + 1 in
   % let () = num-subsection <- 0 in
-  let () = needs-indentation-ref <- false in % 節の最初の段落は字下げしない
+  let () = needs-indentation-ref <- true in % 節の最初の段落も字下げする
   let s-num = arabic (!num-section) in
   let () = register-cross-reference (label ^ `:num`) s-num in
   let () = toc-acc-ref <- (TOCElementSection(label, title)) :: !toc-acc-ref in
