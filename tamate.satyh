@@ -1,4 +1,9 @@
+@require: pervasives
+
+% 文字サイズ13Q
 let font-size-normal = 3.25mm
+% 行送り22H
+let line-space-normal = 5.5mm
 
 let font-ratio-latin = 1.0 /. 0.88
 let font-ratio-cjk = 1.0
@@ -25,17 +30,36 @@ let get-standard-context =
     |> set-font Latin          font-latin-roman
     |> set-math-font `lmodern`
     |> set-font-size font-size-normal
+    |> set-leading line-space-normal
     |> set-hyphen-penalty 100
 
-let-block ctx +p it =
-  line-break true true ctx
-    (read-inline ctx it ++ inline-fil)
+let-mutable needs-indentation-ref <- true
+
+let quad-indent ctx =
+  inline-skip (get-font-size ctx)
+
+let-block ctx +p inner =
+  let needs-indentation =
+    if !needs-indentation-ref then true else
+      let () = needs-indentation-ref <- true in
+        false
+  in
+  let ib-inner = read-inline ctx inner in
+  let br-parag =
+    if needs-indentation then
+      (quad-indent ctx) ++ ib-inner ++ inline-fil
+    else
+      ib-inner ++ inline-fil
+  in
+    form-paragraph ctx br-parag
+
+let-block ctx +pn inner =
+  let () = needs-indentation-ref <- true in
+  let ib-inner = read-inline ctx inner in
+    form-paragraph ctx (ib-inner ++ inline-fil)
 
 let document bt =
-  let ctx =
-    get-standard-context
-      |> set-dominant-narrow-script Latin
-  in
+  let ctx = get-standard-context in
   let bb = read-block ctx bt in
   let b5paper = UserDefinedPaper(182mm, 257mm) in
   page-break b5paper
